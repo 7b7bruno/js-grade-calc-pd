@@ -55,28 +55,42 @@ Zem vēstures ir jāizvada visu ierakstu vidējais rezultāts procentos.
       const gradingSchemeSelect = document.getElementById("grading-scheme");
       const resultDiv = document.getElementById("result");
 
-      function handleClick() {
+      calculateBtn.addEventListener("click", function () {
+        console.log("click");
+
         const name = nameInput.value;
         const points = parseFloat(pointsInput.value);
         const maxPoints = parseFloat(maxPointsInput.value);
         const gradingScheme = gradingSchemeSelect.value;
 
+        if(isValid(name, points, maxPoints, gradingScheme)) {
+            let grade = calcGrade(gradingScheme, points, maxPoints);
+            resultDiv.innerHTML = grade;
+        }
+      });
+
+      function isValid(name, points, maxPoints, gradingScheme) {
         // Validate inputs
         if (!name || isNaN(points) || isNaN(maxPoints) || maxPoints <= 0) {
           resultDiv.innerHTML = "Lūdzu, aizpildiet visus laukus pareizi.";
-          return;
+          return false;
         }
         if (points < 0 || points > maxPoints) {
           resultDiv.innerHTML =
             "Iegūtie punkti nedrīkst pārsniegt maksimālos punktus.";
-          return;
+          return false;
         }
 
+        return true;
+      }
+
+      function calcGrade(gradingScheme, points, maxPoints) {
         let grade = "";
         if (gradingScheme === "percentage") {
           const percentage = (points / maxPoints) * 100;
           grade = `Jūsu procentuālā vērtība ir: ${percentage.toFixed(2)}%`;
-        } else if (gradingScheme === "letter") {
+        } 
+        else if (gradingScheme === "letter") {
           if (points >= 90) {
             grade = "Jūsu burtu vērtējums ir: A";
           } else if (points >= 80) {
@@ -89,13 +103,9 @@ Zem vēstures ir jāizvada visu ierakstu vidējais rezultāts procentos.
             grade = "Jūsu burtu vērtējums ir: F";
           }
         }
-        resultDiv.innerHTML = grade;
-      }
 
-      calculateBtn.addEventListener("click", function () {
-        console.log("click");
-        handleClick();
-      });
+        return grade;
+      }
 
       //   === TERMINI un KODA PIEMĒRI ===
       // input, button, id, class, script, const, let, document, querySelector, getElementById,
