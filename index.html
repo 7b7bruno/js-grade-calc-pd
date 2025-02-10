@@ -47,6 +47,10 @@ Zem vēstures ir jāizvada visu ierakstu vidējais rezultāts procentos.
 
     <div id="result"></div>
 
+    <div id="history"></div>
+    <p>Vidējais vērtējums procentos:</p>
+    <p id="avg"></p>
+
     <script>
       const calculateBtn = document.getElementById("calculate-btn");
       const nameInput = document.getElementById("name");
@@ -54,6 +58,36 @@ Zem vēstures ir jāizvada visu ierakstu vidējais rezultāts procentos.
       const maxPointsInput = document.getElementById("max-points");
       const gradingSchemeSelect = document.getElementById("grading-scheme");
       const resultDiv = document.getElementById("result");
+      const historyDiv = document.getElementById("history");
+      const avgP = document.getElementById("avg");
+
+      function loadHistory() {
+        let sum = 0;
+
+        let output = "<ul>";
+        let i = 0;
+        for (let key in localStorage) {
+          let element = localStorage.getItem(key);
+          if (element != null) {
+            let data = JSON.parse(element);
+            console.log(data);
+
+            const grade = parseInt(data.grade);
+            sum += grade;
+
+            output += `<li>${data.name} : ${data.grade}%</li>`;
+            i++;
+          }
+        }
+        let ouput = +"</ul>";
+        historyDiv.innerHTML = output;
+
+        let avg = sum / i;
+
+        avgP.innerHTML = avg;
+      }
+
+      loadHistory();
 
       calculateBtn.addEventListener("click", function () {
         console.log("click");
@@ -63,11 +97,23 @@ Zem vēstures ir jāizvada visu ierakstu vidējais rezultāts procentos.
         const maxPoints = parseFloat(maxPointsInput.value);
         const gradingScheme = gradingSchemeSelect.value;
 
-        if(isValid(name, points, maxPoints, gradingScheme)) {
-            let grade = calcGrade(gradingScheme, points, maxPoints);
-            resultDiv.innerHTML = grade;
+        if (isValid(name, points, maxPoints, gradingScheme)) {
+          let grade = calcGrade(gradingScheme, points, maxPoints);
+          resultDiv.innerHTML = grade.string;
+          storeHistory(grade.percentage, name);
         }
+
+        loadHistory();
       });
+
+      function storeHistory(percentage, name) {
+        const time = Date.now();
+        const data = {
+          grade: percentage,
+          name: name,
+        };
+        localStorage.setItem(time, JSON.stringify(data));
+      }
 
       function isValid(name, points, maxPoints, gradingScheme) {
         // Validate inputs
@@ -86,25 +132,24 @@ Zem vēstures ir jāizvada visu ierakstu vidējais rezultāts procentos.
 
       function calcGrade(gradingScheme, points, maxPoints) {
         let grade = "";
+        const percentage = (points / maxPoints) * 100;
         if (gradingScheme === "percentage") {
-          const percentage = (points / maxPoints) * 100;
           grade = `Jūsu procentuālā vērtība ir: ${percentage.toFixed(2)}%`;
-        } 
-        else if (gradingScheme === "letter") {
-          if (points >= 90) {
+        } else if (gradingScheme === "letter") {
+          if (percentage >= 90) {
             grade = "Jūsu burtu vērtējums ir: A";
-          } else if (points >= 80) {
+          } else if (percentage >= 80) {
             grade = "Jūsu burtu vērtējums ir: B";
-          } else if (points >= 70) {
+          } else if (percentage >= 70) {
             grade = "Jūsu burtu vērtējums ir: C";
-          } else if (points >= 60) {
+          } else if (percentage >= 60) {
             grade = "Jūsu burtu vērtējums ir: D";
           } else {
             grade = "Jūsu burtu vērtējums ir: F";
           }
         }
 
-        return grade;
+        return { string: grade, percentage: percentage };
       }
 
       //   === TERMINI un KODA PIEMĒRI ===
